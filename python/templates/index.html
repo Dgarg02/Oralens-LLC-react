@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .form-container {
+            background: #ffffff;
+            color: #333;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #1e3c72;
+            outline: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9f9f9;
+            color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-remove {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background: #e63939;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #162f57, #243e6b);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Healthcare Form</h2>
+        <form id="healthcare-form" enctype="multipart/form-data">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+            <label for="age_group">Age Group</label>
+            <select id="age_group" name="age_group" required>
+                <option value="" disabled selected>Select your age group</option>
+                <option value="1-10">1-10</option>
+                <option value="11-20">11-20</option>
+                <option value="21-30">21-30</option>
+                <option value="31-40">31-40</option>
+                <option value="41-50">41-50</option>
+                <option value="51-60">51-60</option>
+                <option value="61-70">61-70</option>
+                <option value="71-80">71-80</option>
+                <option value="81-90">81-90</option>
+                <option value="91-100">91-100</option>
+            </select>
+
+            <label for="files">Upload Files</label>
+            <input type="file" id="files" name="files" multiple>
+            <ul id="file-list"></ul>
+
+            <button type="button" class="btn btn-primary" id="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('files');
+        const fileList = document.getElementById('file-list');
+        const form = document.getElementById('healthcare-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Update file list
+        fileInput.addEventListener('change', () => {
+            fileList.innerHTML = '';
+            Array.from(fileInput.files).forEach((file, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = file.name;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn-remove';
+                removeBtn.textContent = '×';
+                removeBtn.addEventListener('click', () => {
+                    const newFileList = Array.from(fileInput.files).filter((_, i) => i !== index);
+                    updateFileInput(newFileList);
+                });
+
+                listItem.appendChild(removeBtn);
+                fileList.appendChild(listItem);
+            });
+        });
+
+        // Update file input value programmatically
+        function updateFileInput(files) {
+            const dataTransfer = new DataTransfer();
+            files.forEach((file) => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+
+        // Handle form submission
+        submitBtn.addEventListener('click', () => {
+            const formData = new FormData(form);
+            fetch('/submit', {
+                method: 'POST',
+                body: formData,
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    alert(`Name: ${data.name}, Age Group: ${data.age_group}, Files: ${data.files.join(', ')}`);
+                })
+                .catch((err) => console.error('Error:', err));
+        });
+    </script>
+</body>
+
+</html>
